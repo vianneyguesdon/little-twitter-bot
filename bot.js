@@ -11,9 +11,11 @@ var T = new Twit({
   // strictSSL:            true,     // optional - requires SSL certificates to be valid.
 })
 
+console.log("bot has started")
+
 // Trouver la date du jour -1
-const date = moment().subtract(1, 'days').format("YYYY-MM-DD");
-console.log("date -1", date)
+const today = moment().format("YYYY-MM-DD");
+// console.log("date -1", date)
 
 // On set l'interval de recherche à 1 par jour
 setInterval(search, 1000*60*15)
@@ -28,14 +30,8 @@ function search() {
     '@TuurDemeester', 
     '@CryptoHustle', 
     '@alistairmilne',
-    '@CryptoCobain',
     '@aantonop',
-    '@AngeloBTC',
-    '@WhalePanda',
-    '#bitcoin',
-    'bitcoin',
-    'crypto',
-
+    '@coindesk'
   ]
   const randomFromTopAccounts = topAccounts[Math.floor(Math.random()*topAccounts.length)]
   console.log("randomFromTopAccounts : ", randomFromTopAccounts)
@@ -43,8 +39,8 @@ function search() {
   const params = { 
     q: randomFromTopAccounts, 
     count: 1,
-    result_type: "mixed",
-    until: date,
+    until: today,
+    result_type: "recent",
     tweet_mode: "extended",
   }
   T.get('search/tweets', params, function(err, data, response) {
@@ -65,13 +61,13 @@ function search() {
     // }
 
     console.log("number of retweets", tweets[0].retweet_count)
-    console.log("trucated ?", tweets[0].trucated)
+    // console.log("trucated ?", tweets[0].trucated)
     
-      if (tweets[0].retweet_count > 50 && tweets[0].trucated === undefined ) {
-        console.log("more that 100 rewteets + Not truncated !")
+      if (tweets[0].retweet_count >= 5) {
+        console.log("more that 10 rewteets")
         tweetNow(tweets[0].full_text)
       } else {
-        console.log("not enough retweets, or content trucated")
+        console.log("not enough retweets")
       }
   })
 }
@@ -100,8 +96,9 @@ function tweetNow(txt) {
     status: txt
   }
   T.post('statuses/update', tweet, function(err, data, response) {
-    if (err !== null) {
+    if (err !== null && err !== undefined) {
       console.log("something went wrong!", err)
+      return
     }
     console.log("data",data)
     console.log("I just tweeted")
